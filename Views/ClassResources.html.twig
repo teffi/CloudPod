@@ -1,0 +1,79 @@
+{% extends '::baseDashboard.html.twig' %}
+ {% block stylesheets %}
+   {{ parent() }}
+     <link href="{{ asset('sources/css/DashboardContent.css') }}" rel="stylesheet">
+  <style>table{ width:100%;}footer{margin-top:3px;}</style>
+  {% endblock %}
+
+  {% block navleft %}
+     <div class="navLeft">
+      <img class="profilepic" src="{{ asset('sources/img/classroomPic.jpg') }}" alt="" >
+      <div id="username"><span style="font-family:Arial;">Welcome to the</span><br/>
+        Resources Section</div>
+      </div>
+  {% endblock %}
+
+{% block body %}
+  <div class="rightContentContainer">
+        <div class="panelTitleContainer">
+          <span class="panelTitle" >Resources Panel</span>
+        </div> 
+        <div class="panelContentActions">
+          <ul>
+          {% if is_granted('ROLE_ADMIN') %}
+            <li><img class="panelIcons" src="{{ asset('sources/img/icons/upload2.png') }}"/><a href="{{ path('upload_resource') }}" class="panelLinks" title="Upload">  Upload Resources </a></li>
+          {% else %}
+            <li><img class="panelIcons" src="{{ asset('sources/img/icons/upload2.png') }}"/><a href="{{ path('class_submit', {'classID': app.session.get('classroomActive')}) }}" class="panelLinks" title="Submit"> Submit Resources </a></li>
+          {% endif %}
+        </ul>
+        </div>
+
+        <div class="panelTitleContainer">
+         <span class="panelTitle" >Resources Explorer</span>
+        </div>
+        <div class="panelContent">
+          <table>
+            <tr><th colspan="5" class="thhead"> Shared Resources </th></tr>
+            <th>Filename</th>
+            <th>File Format</th>
+            <th colspan="2">Action</th>
+            <th>Date || Time</th>
+            {% for resource in resources %}
+              <tr>
+                <td><img class="miniicons" src="{{ asset('sources/img/icons/file.png') }}"/>{{  resource.name }} </td>
+                <td>{{  resource.mimeType }}</td>
+                <td> <img class="miniicons" src="{{ asset('sources/img/icons/download.png') }}"/><a href="{{ path('download', {'param': 'resource', 'param2': resource.resourceID }) }}" class="panelLinks"> Download - {{ resource.size | size }}</a></td>
+              {% if is_granted('ROLE_ADMIN')%}                
+                 <td><img class="miniicons" src="{{ asset('sources/img/icons/delete.png') }}"/> <a href="{{ path('delete_resource', {'id': resource.resourceID }) }}" class="panelLinks">Delete</a></td>
+                </td>
+              {% endif %}
+                <td>{{ resource.uploadedAt | date('Y-m-d') }} || {{ resource.uploadedAt | date('h:m:s') }}</td>
+              </tr>
+            {% else %}
+              <tr><td colspan="3">No resources available  </td></tr>
+            {% endfor %}
+          </table>
+        </div>
+
+        {% if is_granted('ROLE_ADMIN') %}
+          <div class="panelContent">
+            <table>
+              <tr><th colspan="5" class="thhead"> Student Submission </th></tr>
+              <th>Filename</th><th>File Format</th><th>Submitted By</th><th>Action</th><th>Date || Time</th>
+              {% for submission in submissions %}
+                <tr>
+                  <td><img class="miniicons" src="{{ asset('sources/img/icons/file.png') }}"/>{{  submission.name }}</td>
+                  <td>{{  submission.mimeType }}</td>
+                  <td><img class="miniicons" src="{{ asset('sources/img/icons/user.png') }}"/>{{ submission.submittedBy.userName}}</td>
+                  <td><img class="miniicons" src="{{ asset('sources/img/icons/download.png') }}"/><a href="{{ path('download', {'param': 'resource', 'param2': submission.submissionID }) }}" class="panelLinks">Download - {{ submission.size | size }} </a></td>
+                  <td>{{  submission.submittedAt |  date('Y-m-d') }}  ||  {{  submission.submittedAt |   date('h:m:s') }}</td> 
+                </tr>
+              {% else %}
+                <tr><td colspan="3">No resources available  </td></tr>
+            {% endfor %}  
+            </table>
+          </div>
+        {% endif %}
+      <div style="clear:both;"></div>    
+  </div>
+{% endblock %}
